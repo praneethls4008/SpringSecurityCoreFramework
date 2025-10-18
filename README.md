@@ -1,3 +1,4 @@
+Security 
 :::::::::::::Student Endpoints:::::::::::::::::::::::
 http://localhost:8111/student/login
 http://localhost:8111/student/register

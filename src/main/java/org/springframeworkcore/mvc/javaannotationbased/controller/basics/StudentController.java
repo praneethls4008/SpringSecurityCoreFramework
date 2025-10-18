@@ -40,6 +40,8 @@ public class StudentController {
 		this.authService = authService;
 		this.userDetailsManager = userDetailsManager;
 		this.passwordEncoder  = passwordEncoder;
+
+		System.out.println("[Controller] UserDetailsManager instance: " + System.identityHashCode(userDetailsManager));
 	}
 
 	@InitBinder
@@ -47,6 +49,16 @@ public class StudentController {
 //        System.out.println("bind");
 	}
 
+	
+	@GetMapping("/debug")
+	@ResponseBody
+	public String debug() {
+	    System.out.println(">>> Debug endpoint triggered");
+	    System.err.println(">>> Error stream test");
+	    return "Debug OK";
+	}
+	
+	
 	@GetMapping("/login")
 	public String studentLoginPage(@CookieValue(value = "userSession", required = false) String userSession,
 			Model model) {
@@ -108,6 +120,7 @@ public class StudentController {
 
 	@GetMapping("/register")
 	public String studentRegisterPage(Model model) {
+		System.out.println("inside regisetr");
 		if (!model.containsAttribute("studentCreateRequestDTO")) {
 			model.addAttribute("studentCreateRequestDTO", new StudentCreateRequestDTO("", ""));
 		}
@@ -117,6 +130,7 @@ public class StudentController {
 	@PostMapping("/newaccount")
 	public String studentNewAccount(@Valid @ModelAttribute StudentCreateRequestDTO studentRequestDTO,
 			BindingResult bindingResult, Model model) {
+		System.out.println("inside newaccount");
 		if (bindingResult.hasErrors()) {
 			return "studentRegisterPage";
 		}
@@ -126,8 +140,14 @@ public class StudentController {
 					new User(studentRequestDTO.username(),
 							passwordEncoder.encode(studentRequestDTO.password()),
                             List.of(new SimpleGrantedAuthority("STUDENT"))));
+
+			System.out.println("iIs new user present: " + userDetailsManager.userExists(studentRequestDTO.username()));
+			System.out.println("new user : " + userDetailsManager.loadUserByUsername(studentRequestDTO.username()));
+
+
 		} catch (Exception e) {
 			model.addAttribute("loginError", e.getMessage());
+			System.out.println("iIs new user present(exception): " + userDetailsManager.userExists(studentRequestDTO.username()));
 			e.printStackTrace();
 			return "studentRegisterPage";
 		}

@@ -6,7 +6,10 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 public class DispatcherServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class[]{DataBaseConfig.class};
+        return new Class[]{
+                DataBaseConfig.class
+//                ,SecurityConfigType2.class
+        };
     }
     @Override
     protected Class<?> @Nullable [] getServletConfigClasses() {

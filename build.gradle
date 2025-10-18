@@ -9,6 +9,8 @@ war {
 }
 
 
+
+
 def tomcatWebapps = "C:/Program Files/Apache Software Foundation/Tomcat 11.0_Tomcat8111/webapps"   // ⬅ Replace with your Tomcat webapps folder
 def tomcatBin = "C:/Program Files/Apache Software Foundation/Tomcat 11.0_Tomcat8111/bin"            // ⬅ Replace with your Tomcat bin folder
 tasks.register("deployToTomcat") {
