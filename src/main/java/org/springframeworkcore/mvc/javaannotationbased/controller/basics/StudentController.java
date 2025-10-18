@@ -3,6 +3,10 @@ package org.springframeworkcore.mvc.javaannotationbased.controller.basics;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,17 +20,26 @@ import org.springframeworkcore.mvc.javaannotationbased.service.StudentService;
 import org.springframeworkcore.mvc.javaannotationbased.session.model.UserSession;
 import org.springframeworkcore.mvc.javaannotationbased.utils.CookieServiceUtil;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 @Controller
 @RequestMapping(value = "/student")
 @SessionAttributes("userSession")//session attributes will be pushed to request scope
 public class StudentController {
-	StudentService studentService;
-	AuthService authService;
+
+	private final PasswordEncoder passwordEncoder;
+	private final UserDetailsManager userDetailsManager;
+	private final StudentService studentService;
+	private final AuthService authService;
 
 	@Autowired
-	public StudentController(StudentService studentService, AuthService authService) {
+	public StudentController(StudentService studentService, AuthService authService, UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
 		this.studentService = studentService;
 		this.authService = authService;
+		this.userDetailsManager = userDetailsManager;
+		this.passwordEncoder  = passwordEncoder;
 	}
 
 	@InitBinder
@@ -108,7 +121,11 @@ public class StudentController {
 			return "studentRegisterPage";
 		}
 		try {
-			studentService.save(studentRequestDTO);
+			System.out.println(passwordEncoder.encode(studentRequestDTO.password()));
+			userDetailsManager.createUser(
+					new User(studentRequestDTO.username(),
+							passwordEncoder.encode(studentRequestDTO.password()),
+                            List.of(new SimpleGrantedAuthority("STUDENT"))));
 		} catch (Exception e) {
 			model.addAttribute("loginError", e.getMessage());
 			e.printStackTrace();

@@ -4,6 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframeworkcore.mvc.javaannotationbased.dto.request.teacher.TeacherCreateRequestDTO;
 import org.springframeworkcore.mvc.javaannotationbased.dto.request.teacher.TeacherLoginRequestDTO;
+import org.springframeworkcore.mvc.javaannotationbased.service.AuthService;
+import org.springframeworkcore.mvc.javaannotationbased.service.StudentService;
 import org.springframeworkcore.mvc.javaannotationbased.service.TeacherAuthService;
 import org.springframeworkcore.mvc.javaannotationbased.service.TeacherService;
 import org.springframeworkcore.mvc.javaannotationbased.session.model.SessionData;
@@ -19,19 +25,25 @@ import org.springframeworkcore.mvc.javaannotationbased.session.service.SessionDa
 import org.springframeworkcore.mvc.javaannotationbased.utils.CookieServiceUtil;
 import org.springframeworkcore.mvc.javaannotationbased.utils.GenerateUUID;
 
+import java.util.List;
+
 @Controller
 @RequestMapping(value = "/teacher")
 public class TeacherController {
-	TeacherService teacherService;
-	TeacherAuthService teacherAuthService;
-	SessionDataService sessionDataService;
+
+	private final PasswordEncoder passwordEncoder;
+	private final UserDetailsManager userDetailsManager;
+	private final TeacherService teacherService;
+	private final TeacherAuthService teacherAuthService;
+	private final SessionDataService sessionDataService;
 
 	@Autowired
-	public TeacherController(TeacherService teacherService, TeacherAuthService teacherAuthService,
-			SessionDataService sessionDataService) {
+	public TeacherController(TeacherService teacherService, TeacherAuthService teacherAuthService, SessionDataService sessionDataService, UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
 		this.teacherService = teacherService;
 		this.teacherAuthService = teacherAuthService;
 		this.sessionDataService = sessionDataService;
+		this.userDetailsManager = userDetailsManager;
+		this.passwordEncoder  = passwordEncoder;
 	}
 
 	@InitBinder
@@ -112,7 +124,11 @@ public class TeacherController {
 			return "teacherRegisterPage";
 		}
 		try {
-			teacherService.save(teacherRequestDTO);
+			System.out.println(passwordEncoder.encode(teacherRequestDTO.password()));
+			userDetailsManager.createUser(
+					new User(teacherRequestDTO.username(),
+							passwordEncoder.encode(teacherRequestDTO.password()),
+							List.of(new SimpleGrantedAuthority("TEACHER"))));
 		} catch (Exception e) {
 			model.addAttribute("loginError", e.getMessage());
 			e.printStackTrace();
