@@ -1,10 +1,12 @@
 package org.springframeworkcore.mvc.javaannotationbased.controller.basics;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
@@ -17,8 +19,6 @@ import org.springframeworkcore.mvc.javaannotationbased.dto.request.student.Stude
 import org.springframeworkcore.mvc.javaannotationbased.dto.request.student.StudentLoginRequestDTO;
 import org.springframeworkcore.mvc.javaannotationbased.service.AuthService;
 import org.springframeworkcore.mvc.javaannotationbased.service.StudentService;
-import org.springframeworkcore.mvc.javaannotationbased.session.model.UserSession;
-import org.springframeworkcore.mvc.javaannotationbased.utils.CookieServiceUtil;
 
 import java.util.List;
 
@@ -55,9 +55,9 @@ public class StudentController {
 		return "studentLoginPage";
 	}
 
-	@GetMapping("/dashboard/")
-	public ModelAndView studentDashBoardPage(@RequestParam("username") String username) {
-		return new ModelAndView("studentDashboardPage", "username", username);
+	@GetMapping("/dashboard")
+	public ModelAndView studentDashBoardPage(@AuthenticationPrincipal UserDetails userDetails) {
+		return new ModelAndView("studentDashboardPage", "username", userDetails.getUsername());
 	}
 
 	@GetMapping("/register")
@@ -81,7 +81,7 @@ public class StudentController {
 			userDetailsManager.createUser(
 					new User(studentRequestDTO.username(),
 							passwordEncoder.encode(studentRequestDTO.password()),
-                            List.of(new SimpleGrantedAuthority("STUDENT"))));
+                            List.of(new SimpleGrantedAuthority("ROLE_STUDENT"))));
 
 			System.out.println("iIs new user present: " + userDetailsManager.userExists(studentRequestDTO.username()));
 			System.out.println("new user : " + userDetailsManager.loadUserByUsername(studentRequestDTO.username()));

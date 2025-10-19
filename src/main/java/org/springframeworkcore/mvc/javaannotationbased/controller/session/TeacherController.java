@@ -4,8 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
@@ -33,13 +36,11 @@ public class TeacherController {
 	private final UserDetailsManager userDetailsManager;
 	private final TeacherService teacherService;
 	private final TeacherAuthService teacherAuthService;
-	private final SessionDataService sessionDataService;
 
 	@Autowired
-	public TeacherController(TeacherService teacherService, TeacherAuthService teacherAuthService, SessionDataService sessionDataService, UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
+	public TeacherController(TeacherService teacherService, TeacherAuthService teacherAuthService, UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
 		this.teacherService = teacherService;
 		this.teacherAuthService = teacherAuthService;
-		this.sessionDataService = sessionDataService;
 		this.userDetailsManager = userDetailsManager;
 		this.passwordEncoder  = passwordEncoder;
 	}
@@ -58,9 +59,9 @@ public class TeacherController {
 
 	}
 
-	@GetMapping("/dashboard/")
-	public ModelAndView teacherDashBoardPage(@RequestParam("username") String username) {
-		return new ModelAndView("teacherDashboardPage", "username", username);
+	@GetMapping("/dashboard")
+	public ModelAndView teacherDashBoardPage(@AuthenticationPrincipal UserDetails userDetails) {
+		return new ModelAndView("teacherDashboardPage", "username", userDetails.getUsername());
 	}
 
 	@GetMapping("/register")
@@ -83,7 +84,7 @@ public class TeacherController {
 			userDetailsManager.createUser(
 					new User(teacherRequestDTO.username(),
 							passwordEncoder.encode(teacherRequestDTO.password()),
-							List.of(new SimpleGrantedAuthority("TEACHER"))));
+							List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))));
 		} catch (Exception e) {
 			model.addAttribute("loginError", e.getMessage());
 			System.out.println("Is new user present(exception): " + userDetailsManager.userExists(teacherRequestDTO.username()));
