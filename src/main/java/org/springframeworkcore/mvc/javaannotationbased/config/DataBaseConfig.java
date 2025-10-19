@@ -23,7 +23,7 @@ public class DataBaseConfig {
     public  DataSource dataSource() {
         HikariDataSource ds = new HikariDataSource();
         ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        ds.setJdbcUrl("jdbc:mysql://localhost:3306/spring_framework_core?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC");
+        ds.setJdbcUrl("jdbc:mysql://localhost:3306/spring_framework_security_core?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC");
         ds.setUsername("root");
         String dbPassword = System.getenv("MYSQL_DB_PASSWORD");
         if (dbPassword == null) {
