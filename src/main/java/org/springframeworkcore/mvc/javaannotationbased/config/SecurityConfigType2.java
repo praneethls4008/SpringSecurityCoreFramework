@@ -2,15 +2,10 @@ package org.springframeworkcore.mvc.javaannotationbased.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -33,17 +28,6 @@ public class SecurityConfigType2 {
 		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 	}
 
-//	@Bean
-//	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//		return http
-//				.authorizeHttpRequests(auth -> auth
-//						.requestMatchers("/WEB-INF/views/**","/student/register", "/student/newaccount", "/teacher/register", "/teacher/newaccount").permitAll()
-//						.anyRequest().authenticated()
-//				)
-//				.formLogin(Customizer.withDefaults()) // default /login for all
-//				.build();
-//	}
-
 	@Bean @Order(3)
 	SecurityFilterChain globalChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
@@ -64,7 +48,21 @@ public class SecurityConfigType2 {
 						.requestMatchers("/teacher/**").authenticated()
 						.anyRequest().authenticated()
 				)
-				.formLogin(Customizer.withDefaults()).build();
+				.formLogin(form -> form
+						.loginPage("/teacher/login")
+						.loginProcessingUrl("/teacher/auth")
+						.defaultSuccessUrl("/teacher/dashboard", true)
+						.failureUrl("/teacher/login?error=true")
+						.usernameParameter("username")
+						.passwordParameter("password")
+						.permitAll()
+				)
+				.logout(logout -> logout
+						.logoutUrl("/teacher/logout")
+						.logoutSuccessUrl("/teacher/login?logout=true")
+						.invalidateHttpSession(true)
+				)
+				.build();
 	}
 
 	@Bean @Order(1)
@@ -76,7 +74,21 @@ public class SecurityConfigType2 {
 						.requestMatchers("/student/**").authenticated()
 						.anyRequest().authenticated()
 				)
-				.formLogin(Customizer.withDefaults()).build();
+				.formLogin(form -> form
+						.loginPage("/student/login")
+						.loginProcessingUrl("/student/auth")
+						.defaultSuccessUrl("/student/dashboard", true)
+						.failureUrl("/student/login?error=true")
+						.usernameParameter("username")
+						.passwordParameter("password")
+						.permitAll()
+				)
+				.logout(logout -> logout
+						.logoutUrl("/student/logout")
+						.logoutSuccessUrl("/student/login?logout=true")
+						.invalidateHttpSession(true)
+				)
+				.build();
 	}
 
 }
