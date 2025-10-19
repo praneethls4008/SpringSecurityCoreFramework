@@ -20,8 +20,6 @@ import org.springframeworkcore.mvc.javaannotationbased.service.StudentService;
 import org.springframeworkcore.mvc.javaannotationbased.session.model.UserSession;
 import org.springframeworkcore.mvc.javaannotationbased.utils.CookieServiceUtil;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -50,67 +48,11 @@ public class StudentController {
 	}
 
 	
-	@GetMapping("/debug")
-	@ResponseBody
-	public String debug() {
-	    System.out.println(">>> Debug endpoint triggered");
-	    System.err.println(">>> Error stream test");
-	    return "Debug OK";
-	}
-	
-	
+
 	@GetMapping("/login")
-	public String studentLoginPage(@CookieValue(value = "userSession", required = false) String userSession,
-			Model model) {
-		if (userSession == null) {
-			
-			if (!model.containsAttribute("studentLoginRequestDTO")) {
-				model.addAttribute("studentLoginRequestDTO", new StudentLoginRequestDTO("", "", false));
-			}
-			return "studentLoginPage";
-		}
-
-		try {
-			UserSession userSessionObj = CookieServiceUtil.cookieToObject(userSession, UserSession.class);
-			model.addAttribute("studentLoginRequestDTO", new StudentLoginRequestDTO(userSessionObj.username(), "", false));
-
-			if (userSessionObj.rememberMe()) {
-				return "redirect:/student/dashboard/?username=" + userSessionObj.username();
-			} else {
-				return "studentLoginPage";
-			}
-		} catch (Exception e) {
-			return "studentLoginPage";
-		}
-
-	}
-
-	@PostMapping("/auth")
-	public String studentAuthPage(@Valid @ModelAttribute StudentLoginRequestDTO studentLoginReqDTO,
-			BindingResult bindingResult, Model model,
-			HttpServletResponse httpResponse) {
-
-		if (bindingResult.hasErrors()) {
-//            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-			return "studentLoginPage";
-		}
-
-		try {
-			authService.studentLogin(studentLoginReqDTO);
-		} catch (Exception authException) {
-			model.addAttribute("loginError", authException.getMessage());
-			authException.printStackTrace();
-			return "studentLoginPage";
-		}
-		
-		try {
-			CookieServiceUtil.add(httpResponse, "userSession", new UserSession(studentLoginReqDTO.username(), studentLoginReqDTO.rememberMe()), 2 * 60);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		return "redirect:/student/dashboard/?username=" + studentLoginReqDTO.username();
-
+	public String studentLoginPage(Model model) {
+		model.addAttribute("studentLoginRequestDTO", new StudentLoginRequestDTO("", "", false));
+		return "studentLoginPage";
 	}
 
 	@GetMapping("/dashboard/")
@@ -150,14 +92,6 @@ public class StudentController {
 			System.out.println("iIs new user present(exception): " + userDetailsManager.userExists(studentRequestDTO.username()));
 			e.printStackTrace();
 			return "studentRegisterPage";
-		}
-		return "redirect:/student/login";
-	}
-	
-	@GetMapping("/logout")
-	public String studentLogout(@CookieValue(value = "userSession", required = false) String userSession, @RequestParam("username") String username,Model model, HttpServletResponse httpResponse) {
-		if(userSession!=null) {
-			CookieServiceUtil.delete(httpResponse, "userSession");
 		}
 		return "redirect:/student/login";
 	}

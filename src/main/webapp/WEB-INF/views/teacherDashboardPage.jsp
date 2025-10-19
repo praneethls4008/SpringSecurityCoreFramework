@@ -48,7 +48,10 @@
     <div class="container">
         <h1>Teacher Dashboard</h1>
         <h2>Welcome ${username}</h2>
-        <a class="logout-btn" href="${pageContext.request.contextPath}/teacher/logout?username=${username}">Logout</a>
+        <form action="${pageContext.request.contextPath}/teacher/logout" method="post">
+                <input type="submit" value="Logout" class="logout-btn"/>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+        </form>
     </div>
 </body>
 </html>
