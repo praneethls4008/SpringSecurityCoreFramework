@@ -27,9 +27,9 @@ import org.springframeworkcore.mvc.javaannotationbased.jwt.JwtAuthenticationFilt
 import java.util.Arrays;
 import java.util.List;
 
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+//@Configuration
+//@EnableWebSecurity
+//@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class SecurityWithJwtConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthFilter;

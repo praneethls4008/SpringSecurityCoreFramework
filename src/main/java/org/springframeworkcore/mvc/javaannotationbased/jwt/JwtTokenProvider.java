@@ -1,4 +1,4 @@
-package org.springframeworkcore.mvc.javaannotationbased.utils;
+package org.springframeworkcore.mvc.javaannotationbased.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.crypto.SecretKey;
@@ -15,7 +16,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Configuration
+@PropertySource("classpath:application.properties")
 public class JwtTokenProvider {
+
     @Value("${jwt.secret}")
     private String secret;
 

@@ -11,7 +11,7 @@ import org.springframeworkcore.mvc.javaannotationbased.dto.request.user.RefreshT
 import org.springframeworkcore.mvc.javaannotationbased.dto.request.user.RegisterRequest;
 import org.springframeworkcore.mvc.javaannotationbased.dto.response.user.AuthenticationResponse;
 import org.springframeworkcore.mvc.javaannotationbased.model.User;
-import org.springframeworkcore.mvc.javaannotationbased.utils.JwtTokenProvider;
+import org.springframeworkcore.mvc.javaannotationbased.jwt.JwtTokenProvider;
 
 @Service
 public class AuthenticationServiceImplementation {

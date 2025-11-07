@@ -2,6 +2,7 @@ package org.springframeworkcore.mvc.javaannotationbased.implementation;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframeworkcore.mvc.javaannotationbased.dao.UserRepository;
 import org.springframeworkcore.mvc.javaannotationbased.service.CustomUserDetailsService;
