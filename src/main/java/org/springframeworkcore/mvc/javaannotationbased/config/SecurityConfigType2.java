@@ -4,15 +4,21 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframeworkcore.mvc.javaannotationbased.utils.JwtAuthFilter;
 
 import javax.sql.DataSource;
 
@@ -43,7 +49,13 @@ public class SecurityConfigType2 {
 	
 	@Bean
 	PasswordEncoder passwordEncoder() {
+
 		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
 	}
 
 	/*
@@ -110,10 +122,30 @@ public class SecurityConfigType2 {
 				.build();
 	}
 
+	@Bean @Order(3)
+	SecurityFilterChain jwtChain(HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter) throws Exception {
+		return httpSecurity
+				.securityMatcher("/jwt/**")
+				.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(session ->
+						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests( auth -> auth
+						.requestMatchers("/jwt/login",
+								"/jwt/register"
+						).permitAll()
+						.requestMatchers("/jwt/**").hasRole("USER")
+						.anyRequest().authenticated()
+				)
+				.addFilterBefore(jwtAuthFilter,UsernamePasswordAuthenticationFilter.class)
+				.build();
+	}
+
+
+
 	/*
 		all req other than student teacher get here -> needs separate auth if needed, student (or) teacher auth doesn't work for this route
 	 */
-	@Bean @Order(3)
+	@Bean @Order(4)
 	SecurityFilterChain globalChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
 				.securityMatcher("/**")
