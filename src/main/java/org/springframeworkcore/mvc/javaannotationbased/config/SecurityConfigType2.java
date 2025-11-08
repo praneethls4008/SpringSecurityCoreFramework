@@ -123,16 +123,31 @@ public class SecurityConfigType2 {
 	}
 
 	@Bean @Order(3)
-	SecurityFilterChain jwtChain(HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter) throws Exception {
+	SecurityFilterChain jwtPublicChain(HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter) throws Exception {
+		return httpSecurity
+				.securityMatcher("/jwt/login",
+						"/jwt/register",
+						"/jwt/refresh")
+				.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(session ->
+						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests( authorize -> authorize
+						.anyRequest()
+						.permitAll()
+				)
+				.build();
+	}
+
+
+
+	@Bean @Order(4)
+	SecurityFilterChain jwtPrivateChain(HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter) throws Exception {
 		return httpSecurity
 				.securityMatcher("/jwt/**")
 				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session ->
 						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests( auth -> auth
-						.requestMatchers("/jwt/login",
-								"/jwt/register"
-						).permitAll()
+				.authorizeHttpRequests( authorize -> authorize
 						.requestMatchers("/jwt/**").hasRole("USER")
 						.anyRequest().authenticated()
 				)

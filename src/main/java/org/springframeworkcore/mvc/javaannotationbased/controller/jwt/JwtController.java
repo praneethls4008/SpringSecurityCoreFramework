@@ -29,17 +29,30 @@ public class JwtController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<Map<String,Object>> login(@RequestBody AuthRequest authRequest) {
         System.out.println("in jwt auth login");
-        String token = jwtAuthenticationService.authenticateAndGenerateToken(
+        Map<String, String> token = jwtAuthenticationService.authenticateAndGenerateTokens(
                 authRequest.getUsername(),
                 authRequest.getPassword()
         );
-        return ResponseEntity.ok(Map.of("token", token));
+        return ResponseEntity.ok(Map.of(
+                "message", "User logged in successfully",
+                "refresh_token", token.get("refresh_token"),
+                "access_token", token.get("access_token")
+        ));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refresh(@RequestBody Map<String, String> body) {
+        System.out.println("inside jwt auth refresh controller");
+        String refreshToken = body.get("refresh_token");
+        System.out.println("refresh_token:"+refreshToken);
+        String newAccessToken = jwtAuthenticationService.refreshAccessToken(refreshToken);
+        return ResponseEntity.ok(Map.of("access_token", newAccessToken));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, Object>> register(@RequestBody RegisterRequest request) {
         System.out.println("in jwt auth register");
         if (userDetailsManager.userExists(request.getUsername())) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
@@ -56,18 +69,20 @@ public class JwtController {
         userDetailsManager.createUser(newUser);
 
         // Optionally generate a token right after registration
-        String token = jwtAuthenticationService.generateToken(newUser);
+        Map<String, String> token = jwtAuthenticationService.generateAccessAndRefreshTokens(newUser);
 
         return ResponseEntity.ok(Map.of(
                 "message", "User registered successfully",
                 "username", request.getUsername(),
-                "token", token
+                "refresh_token", token.get("refresh_token"),
+                "access_token", token.get("access_token")
         ));
     }
 
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> dashboard(Authentication authentication) {
         // The Authentication object is automatically injected by Spring Security
+        System.out.println("inside jwt auth dashboard controller");
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Welcome to your dashboard!");
         response.put("username", authentication.getName());
