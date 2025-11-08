@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframeworkcore.mvc.javaannotationbased.service.JwtAuthenticationService;
 import org.springframeworkcore.mvc.javaannotationbased.service.JwtService;
 
+import java.util.Map;
+
 @Service
 public class JwtAuthenticationServiceImplementation implements JwtAuthenticationService {
     private final AuthenticationManager authenticationManager;
@@ -21,18 +23,28 @@ public class JwtAuthenticationServiceImplementation implements JwtAuthentication
         this.userDetailsManager = userDetailsManager;
     }
 
-    public String generateToken(UserDetails userDetails){
-        return jwtService.generateToken(userDetails);
+    public Map<String, String> generateAccessAndRefreshTokens(UserDetails userDetails){
+        return jwtService.generateAccessAndRefreshTokens(userDetails);
     }
 
-    public String authenticateAndGenerateToken(String username, String password) {
+    public String refreshAccessToken(String refreshToken){
+        String username = jwtService.extractUsername(refreshToken);
+        System.out.println("username extracted from refresh_token:"+username);
+        UserDetails userDetails = userDetailsManager.loadUserByUsername(username);
+        System.out.println("username deatils:"+userDetails);
+        return jwtService.refreshAccessToken(refreshToken, userDetails);
+    }
+
+
+
+    public Map<String, String>  authenticateAndGenerateTokens(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
 
         if (authentication.isAuthenticated()) {
             UserDetails userDetails = userDetailsManager.loadUserByUsername(username);
-            return jwtService.generateToken(userDetails);
+            return jwtService.generateAccessAndRefreshTokens(userDetails);
         } else {
             throw new RuntimeException("Invalid credentials");
         }
