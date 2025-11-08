@@ -157,6 +157,11 @@ dependencies {
     implementation 'org.springframework.security:spring-security-taglibs:6.3.1'
     implementation 'org.springframework.security:spring-security-crypto:6.3.1'
 
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
     // optional advanced
     implementation 'org.springframework.security:spring-security-aspects:6.3.1'
     implementation 'org.springframework.security:spring-security-oauth2-core:6.3.1'
